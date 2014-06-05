@@ -8,7 +8,7 @@ module QBWC
       source_root File.expand_path('../templates', __FILE__)
       
       def copy_config
-         template('config/qbwc.rb', "config/initializers/qbwc.rb")
+         template('config/initializers/qbwc.rb', "config/initializers/qbwc.rb")
       end
 
       def copy_controller 
