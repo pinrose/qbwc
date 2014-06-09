@@ -102,11 +102,11 @@ class << self
 private
 
   def raise_if_enabled_jobs
-    # raise "This option cannot be changed when any jobs are enabled" if QBWC::Session.enabled_jobs?
+    raise "This option cannot be changed when any jobs are enabled" if QBWC::Session.new.enabled_jobs?
   end
 
   def raise_if_invalid_option(name, valid_options, option)
-    # raise "#{name} must be #{valid_options.join(' or ')}" unless valid_options.include?(option)
+    raise "#{name} must be #{valid_options.join(' or ')}" unless valid_options.include?(option)
   end
 
 end
