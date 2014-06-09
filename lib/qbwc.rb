@@ -106,7 +106,7 @@ private
   end
 
   def raise_if_invalid_option(name, valid_options, option)
-    raise "#{name} must be #{valid_options.join(' or ')}" unless valid_options.include?(option)
+    # raise "#{name} must be #{valid_options.join(' or ')}" unless valid_options.include?(option)
   end
 
 end
