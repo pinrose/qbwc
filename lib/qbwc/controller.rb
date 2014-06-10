@@ -58,12 +58,9 @@ module QBWC
    <AppSupport>#{QBWC.support_site_url || root_url(:protocol => 'https://')}</AppSupport>
    <UserName>#{@username || QBWC.username}</UserName>
    <OwnerID>#{QBWC.owner_id}</OwnerID>
-   <FileID>{90A44FB5-33D9-4815-AC85-BC87A7E7D1EB}</FileID>
+   <FileID>#{QBWC.file_id}</FileID>
    <QBType>QBFS</QBType>
    <Style>Document</Style>
-   <Scheduler>
-      <RunEveryNMinutes>#{QBWC.minutes_to_run}</RunEveryNMinutes>
-   </Scheduler>
 </QBWCXML>
 QWC
       send_data qwc, :filename => "#{@filename || Rails.application.class.parent_name}.qwc", :content_type => 'application/x-qwc'

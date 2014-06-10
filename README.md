@@ -179,8 +179,7 @@ Override get_user and current_company methods in the generated controller. authe
       username if username == QBWC.username && password == QBWC.password
     end
     def current_company(user)
-      QBWC.company_file_path if QBWC.pending_jobs(QBWC.company_file_path).presen
-t?
+      QBWC.company_file_path if QBWC.pending_jobs(QBWC.company_file_path).present?
     end
 
 

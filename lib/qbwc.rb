@@ -30,7 +30,11 @@ module QBWC
   # Quickbooks owner id provided in qwc file
   mattr_accessor :owner_id
   @@owner_id = '{57F3B9B1-86F1-4fcc-B1EE-566DE1813D20}'
-  
+
+  # Quickbooks owner id provided in qwc file
+  mattr_accessor :file_id
+  @@file_id = '{57F3B9B1-86F1-4fcc-B1EE-566DE1813D20}'
+
   # How often to run web service (in minutes)
   mattr_accessor :minutes_to_run
   @@minutes_to_run = 5
