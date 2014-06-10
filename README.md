@@ -250,6 +250,12 @@ Set Quickbooks owner ID
 c.owner_id = '{57F3B9B1-86F1-4fcc-B1EE-566DE1813D20}'
 ```
 
+Set Quickbooks file ID
+
+```ruby
+c.file_id = '{90A44FB5-33D9-4815-AC85-BC87A7E7D1EB}'
+```
+
 In the event of an error in the communication process do you wish the sync to stop or blaze through
 
 ```ruby

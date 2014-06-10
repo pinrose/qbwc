@@ -11,7 +11,7 @@ class QbwcController < ApplicationController
     <AppSupport>#{QBWC.support_site_url}</AppSupport>
     <UserName>#{QBWC.username}</UserName>
     <OwnerID>#{QBWC.owner_id}</OwnerID>
-    <FileID>{90A44FB5-33D9-4815-AC85-BC87A7E7D1EB}</FileID>
+    <FileID>#{QBWC.file_id}</FileID>
     <QBType>QBFS</QBType>
     <Style>Document</Style>
     <Scheduler>

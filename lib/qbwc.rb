@@ -35,7 +35,12 @@ module QBWC
   #
   mattr_accessor :owner_id
   @@owner_id = '{57F3B9B1-86F1-4fcc-B1EE-566DE1813D20}'
-  
+
+  # Quickbooks file id provided in the qwc file
+  #
+  mattr_accessor :file_id
+  @@file_id = '{90A44FB5-33D9-4815-AC85-BC87A7E7D1EB}'
+
   # OnError action
   #
   mattr_reader :on_error

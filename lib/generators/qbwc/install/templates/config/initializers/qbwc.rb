@@ -25,6 +25,10 @@ QBWC.configure do |c|
   #
   c.owner_id = '{57F3B9B1-86F1-4fcc-B1EE-566DE1813D20}'
 
+  # Quickbooks File ID provided in the QWC File
+  #
+  c.file_id = '{90A44FB5-33D9-4815-AC85-BC87A7E7D1EB}'
+
   # Perform response processing after session termination. Enabling this option
   # will speed up qbwc session time (and potentially fix timeout issues) at the
   # expense of  memory since every response must be stored until it is
