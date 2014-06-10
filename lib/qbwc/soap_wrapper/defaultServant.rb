@@ -113,7 +113,7 @@ class QBWC::QBWebConnectorSvcSoap
   def closeConnection(parameters)
     #p [parameters]
     qbwc_session = QBWC::Session.new_or_unfinished
-    if qbwc_session && qbwc_session.finished?
+    if qbwc_session && qbwc_session.finished? && qbwc_session.respond_to?(:current_request)
       qbwc_session.current_request.process_response unless qbwc_session.current_request.blank?
     end
     QBWC::CloseConnectionResponse.new('OK')
