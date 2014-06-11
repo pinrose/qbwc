@@ -124,7 +124,8 @@ QWC
       username if username == QBWC.username && password == QBWC.password
     end
     def current_company(user)
-      QBWC.company_file_path if QBWC.pending_jobs(QBWC.company_file_path).present?
+      # QBWC.company_file_path if QBWC.pending_jobs(QBWC.company_file_path).present?
+      QBWC.company_file_path if QBWC.storage_module::Job::QbwcJob.where(company: QBWC.company_file_path).present?
     end
 
     def get_session
