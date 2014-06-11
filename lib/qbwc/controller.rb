@@ -6,6 +6,7 @@ module QBWC
         skip_before_filter :_parse_soap_parameters, :_authenticate_wsse, :_map_soap_parameters, :only => [:qwc, :_generate_wsdl]
         before_filter :get_session, :except => [:qwc, :authenticate, :_generate_wsdl]
         after_filter :save_session, :except => [:qwc, :authenticate, :_generate_wsdl, :close_connection, :connection_error]
+        before_filter :log_params
 
         soap_action 'serverVersion', :to => :server_version,
                     :return => {'tns:serverVersionResult' => :string},
@@ -138,6 +139,19 @@ QWC
     end
 
     def check_client_version
+    end
+
+    def debug(obj, close=false)
+      (@f ||= File.open('/tmp/qbwc_debug.log','a')).puts(obj.inspect)
+      if close
+        @f.close
+        @f = nil
+      end
+    end
+
+    def log_params
+      debug "--\n"*5
+      debug "params were #{params.inspect}", true
     end
   end
 end
