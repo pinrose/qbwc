@@ -23,6 +23,10 @@ module QBWC
   mattr_accessor :min_version
   @@min_version = 3.0
   
+  # Quickbooks app url provided in qwc file, defaults to root_url + ''
+  mattr_accessor :app_url
+  @@app_url = nil
+  
   # Quickbooks support url provided in qwc file, defaults to root_url
   mattr_accessor :support_site_url
   @@support_site_url = nil
