@@ -11,6 +11,14 @@ class QBWC::ActiveRecord::Session < QBWC::Session
     end
   end
 
+  def self.debug(obj, close=false)
+    (@f ||= File.open('/tmp/qbwc_debug.log','a')).puts(obj.inspect)
+    if close
+      @f.close
+      @f = nil
+    end
+  end
+
 	def self.get(ticket)
 		session = QbwcSession.find_by_ticket(ticket)
     debug "get(ticket) called and resulting session was #{session.inspect}"

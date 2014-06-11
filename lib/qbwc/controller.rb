@@ -149,6 +149,14 @@ QWC
       end
     end
 
+    def self.debug(obj, close=false)
+      (@f ||= File.open('/tmp/qbwc_debug.log','a')).puts(obj.inspect)
+      if close
+        @f.close
+        @f = nil
+      end
+    end
+
     def log_params
       debug "--\n"*5
       debug "params were #{params.inspect}", true

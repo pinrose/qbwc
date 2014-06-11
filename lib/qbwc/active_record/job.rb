@@ -11,6 +11,14 @@ class QBWC::ActiveRecord::Job < QBWC::Job
     end
   end
 
+  def self.debug(obj, close=false)
+    (@f ||= File.open('/tmp/qbwc_debug.log','a')).puts(obj.inspect)
+    if close
+      @f.close
+      @f = nil
+    end
+  end
+
   def initialize(name, company, *requests, &block)
     super
     @job = find_job.first_or_create do |job|
