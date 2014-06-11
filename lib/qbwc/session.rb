@@ -12,7 +12,7 @@ class QBWC::Session
   def initialize(user = nil, company = nil, ticket = nil)
     @user = user
     @company = company
-    @current_job = nil
+    @current_job ||= nil # Subclasses may set @current_job and then call super. Don't unset @current_job
     @error = nil
     @progress = 0
     @iterator_id = nil
