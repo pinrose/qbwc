@@ -3,7 +3,7 @@ module QBWC
     def self.included(base)
       base.class_eval do
         include WashOut::SOAP
-        skip_before_filter :_parse_soap_parameters, :_authenticate_wsse, :_map_soap_parameters, :only => [:qwc, :_generate_wsdl]
+        skip_before_filter :_parse_soap_parameters, :_authenticate_wsse, :_map_soap_parameters, :only => :qwc
         before_filter :get_session, :except => [:qwc, :authenticate, :_generate_wsdl]
         after_filter :save_session, :except => [:qwc, :authenticate, :_generate_wsdl, :close_connection, :connection_error]
         before_filter :log_params
@@ -54,7 +54,7 @@ module QBWC
 <QBWCXML>
    <AppName>#{Rails.application.class.parent_name} #{Rails.env} #{@app_name_suffix}</AppName>
    <AppID></AppID>
-   <AppURL>#{url_for(:controller => self.controller_path, :action => 'action', :protocol => 'https://')}</AppURL>
+   <AppURL>#{QBWC.app_url || (root_url(:protocol => 'https://')+'qbwc/action')}</AppURL>
    <AppDescription>Quickbooks integration</AppDescription>
    <AppSupport>#{QBWC.support_site_url || root_url(:protocol => 'https://')}</AppSupport>
    <UserName>#{@username || QBWC.username}</UserName>
