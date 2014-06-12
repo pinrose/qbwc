@@ -28,7 +28,7 @@ class QBWC::Session
   end
 
   def next
-    until (request = current_job.next) do
+    until (request = @current_job.try(:next)) do
       pending_jobs.shift
       reset(true) or break
     end
