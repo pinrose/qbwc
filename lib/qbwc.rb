@@ -60,34 +60,8 @@ module QBWC
   
   class << self
 
-    def storage_module
-      const_get storage.to_s.camelize
-    end
-    
-    def add_job(name, company = nil, *requests, &block)
-      @@jobs[name.to_sym] = storage_module::Job.new(name, company, *requests, &block)
-    end
-
-    def pending_jobs(company)
-      @@jobs.each { |_,job| job.reset }
-      @@jobs.values.select {|job| job.company == company && job.pending?}
-    end
-    
-    def on_error=(reaction)
-      raise 'Quickbooks type must be :qb or :qbpos' unless [:stop, :continue].include?(reaction)
-      @@on_error = "stopOnError" if reaction == :stop
-      @@on_error = "continueOnError" if reaction == :continue
-    end
-    
-    def api=(api)
-      raise 'Quickbooks type must be :qb or :qbpos' unless [:qb, :qbpos].include?(api)
-      @@api = api
-      @@parser = Qbxml.new(api) 
-    end
-
-    # Allow configuration overrides
-    def configure
-      yield self
+    def pending_jobs
+      QBWC::QbwcJob.where(processed: false)
     end
 
   end

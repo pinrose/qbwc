@@ -6,7 +6,6 @@ module QBWC
         skip_before_filter :_parse_soap_parameters, :_authenticate_wsse, :_map_soap_parameters, :only => :qwc
         before_filter :get_session, :except => [:qwc, :authenticate, :_generate_wsdl]
         after_filter :save_session, :except => [:qwc, :authenticate, :_generate_wsdl, :close_connection, :connection_error]
-        before_filter :log_params
 
         soap_action 'serverVersion', :to => :server_version,
                     :return => {'tns:serverVersionResult' => :string},
@@ -82,8 +81,8 @@ QWC
     def authenticate
       user = authenticate_user(params[:strUserName], params[:strPassword])
       if user
-        company = current_company(user)
-        ticket = QBWC.storage_module::Session.new(user, company).ticket if company
+        company = current_company
+        ticket = QBWC::QbwcSession.create.ticket if company
         company ||= 'none'
       end
       render :soap => {"tns:authenticateResult" => {"tns:string" => [ticket || '', company || 'nvu']}}
@@ -105,7 +104,7 @@ QWC
     end
 
     def close_connection
-      @session.destroy
+      @session.complete_session
       render :soap => {'tns:closeConnectionResult' => 'OK'}
     end
 
@@ -123,13 +122,13 @@ QWC
     def authenticate_user(username, password)
       username if username == QBWC.username && password == QBWC.password
     end
-    def current_company(user)
-      # QBWC.company_file_path if QBWC.pending_jobs(QBWC.company_file_path).present?
-      QBWC.company_file_path if QBWC.storage_module::Job::QbwcJob.where(company: QBWC.company_file_path).present?
+
+    def current_company
+      QBWC.company_file_path if QBWC.pending_jobs.count > 0
     end
 
     def get_session
-      @session = QBWC.storage_module::Session.get(params[:ticket])
+      @session = QBWC::QbwcSession.find_by_ticket(params[:ticket])
     end
 
     def save_session
@@ -140,27 +139,6 @@ QWC
     end
 
     def check_client_version
-    end
-
-    def debug(obj, close=false)
-      (@f ||= File.open('/tmp/qbwc_debug.log','a')).puts(obj.inspect)
-      if close
-        @f.close
-        @f = nil
-      end
-    end
-
-    def self.debug(obj, close=false)
-      (@f ||= File.open('/tmp/qbwc_debug.log','a')).puts(obj.inspect)
-      if close
-        @f.close
-        @f = nil
-      end
-    end
-
-    def log_params
-      debug "--\n"*5
-      debug "params were #{params.inspect}", true
     end
   end
 end

@@ -4,11 +4,10 @@ class CreateQbwcSessions < ActiveRecord::Migration
       t.string :ticket
       t.string :user
       t.string :company, :limit => 1000
-      t.integer :progress, :null => false, :default => 0
-      t.string :current_job
-      t.string :iterator_id
+      t.integer :total_requests, :null => false, :default => 0
+      t.integer :prev_qbwc_job_id
+      t.integer :next_qbwc_job_id
       t.string :error, :limit => 1000
-      t.string :pending_jobs, :limit => 1000, :null => false, :default => ''
 
       t.timestamps
     end
