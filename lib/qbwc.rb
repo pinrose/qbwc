@@ -2,12 +2,13 @@ require 'qbwc/railtie'
 require 'qbxml'
 
 module QBWC
-  autoload :ActiveRecord, 'qbwc/active_record'
   autoload :Controller, 'qbwc/controller'
   autoload :Version, 'qbwc/version'
-  autoload :Job, 'qbwc/job'
   autoload :Session, 'qbwc/session'
   autoload :Request, 'qbwc/request'
+  autoload :QbwcJob, 'qbwc/qbwc_job'
+  autoload :QbwcSession, 'qbwc/qbwc_session'
+  autoload :ModelMethods, 'qbwc/model_methods'
 
   # Web connector login credentials
   mattr_accessor :username
