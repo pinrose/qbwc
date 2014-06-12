@@ -12,9 +12,6 @@ QBWC.configure do |c|
   
   #Quickbooks Type (either :qb or :qbpos)
   c.api = :qb
-
-  # Storage module
-  c.storage = :active_record
   
   #Quickbooks Support URL provided in QWC File
   c.support_site_url = nil

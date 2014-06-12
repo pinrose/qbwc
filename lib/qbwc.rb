@@ -53,15 +53,28 @@ module QBWC
   # Quickbooks Type (either :qb or :qbpos)
   mattr_reader :api, :parser
   @@api = :qb
-
-  # Storage module
-  mattr_accessor :storage
-  @@storage = :active_record
   
   class << self
 
     def pending_jobs
       QBWC::QbwcJob.where(processed: false)
+    end
+
+    def on_error=(reaction)
+      raise 'Quickbooks type must be :qb or :qbpos' unless [:stop, :continue].include?(reaction)
+      @@on_error = "stopOnError" if reaction == :stop
+      @@on_error = "continueOnError" if reaction == :continue
+    end
+
+    def api=(api)
+      raise 'Quickbooks type must be :qb or :qbpos' unless [:qb, :qbpos].include?(api)
+      @@api = api
+      @@parser = Qbxml.new(api)
+    end
+
+    # Allow configuration overrides
+    def configure
+      yield self
     end
 
   end

@@ -2,39 +2,44 @@ module QBWC
   class QbwcSession < ActiveRecord::Base
     before_create :setup
 
+    belongs_to :previous_job, class_name: QBWC::QbwcJob, foreign_key: :prev_qbwc_job_id
+    belongs_to :next_job,     class_name: QBWC::QbwcJob, foreign_key: :next_qbwc_job_id
+
     def current_request
       request = nil
       mark_prev_as_processed
-      if next_id = self.next_qbwc_job_id
-        job = QBWC::QbwcJob.find_by_id(next_id)
-        obj = job.klass.send(:find_by_id, job.klass_id)
+      if job = self.next_job
+        obj = job.klass.send(:find, job.klass_id)
         request = obj.qb_payload
         request.delete('xml_attributes')
         request.values.first['xml_attributes'] = {'iterator' => 'Continue', 'iteratorID' => obj.id}
         request = QBWC::Request.new(request)
-        advance(job)
+        advance
       end
       request
     end
 
-    def advance(current_job)
-      next_job = QBWC::QbwcJob.where(processed: false).where('id != ?', current_job.id).order('id asc').limit(1).first
-      self.prev_qbwc_job_id = current_job.id
-      self.next_qbwc_job_id = next_job.try(:id) || nil
+    def next_job_in_queue
+      QBWC::QbwcJob.where(processed: false).where('id != ?', self.next_job.id).order('id asc').limit(1).first
+    end
+
+    def advance
+      self.prev_qbwc_job_id = next_job.id
+      self.next_qbwc_job_id = next_job_in_queue.try(:id) || nil
       self.save
     end
 
     def mark_prev_as_processed
-      return if self.prev_qbwc_job_id.blank?
-      prev = QBWC::QbwcJob.find_by_id(self.prev_qbwc_job_id)
-      prev.processed = true
-      prev.save
+      return if self.previous_job.blank?
+      self.previous_job.processed = true
+      self.previous_job.save!
     end
 
     def progress
       n_processed = QBWC::QbwcJob.where(processed: true).count.to_f
-      return 100 if n_processed < 1
-      (n_processed / self.total_requests)*100
+      total_jobs = QBWC::QbwcJob.count.to_f
+      return 100 if n_processed == total_jobs
+      (n_processed / total_jobs)*100
     end
 
     def complete_session
@@ -45,7 +50,6 @@ module QBWC
     private
     def setup
       self.token = Digest::SHA1.hexdigest("#{Rails.application.config.secret_token}#{Time.now.to_i}")
-      self.total_requests = QBWC::QbwcJob.where(processed: false).count
     end
   end
 end
