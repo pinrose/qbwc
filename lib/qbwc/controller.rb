@@ -100,6 +100,9 @@ QWC
       else
         @session.response = params[:response]
       end
+
+      run_response_callback
+
       render :soap => {'tns:receiveResponseXMLResult' => @session.error ? -1 : @session.progress}
     end
 
@@ -133,6 +136,20 @@ QWC
 
     def save_session
       @session.save if @session
+    end
+
+    def run_response_callback
+      job = @session.previous_job
+      obj = eval(job.klass).send(:find, job.klass_id)
+      resp = if @session.response
+               # all is well(?). mark the previous job as processed
+               job.processed = true
+               job.save!
+               Hash.from_xml(@session.response.gsub("\n", ""))
+             elsif @session.error
+               {error: @session.error}
+             end
+      obj.qb_response_handler(resp)
     end
 
     def server_version_response

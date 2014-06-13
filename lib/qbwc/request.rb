@@ -7,22 +7,37 @@ class QBWC::Request
     #If it's a hash verify that it is properly wrapped with qbxml_msg_rq and xml_attributes for on_error events
     #Allow strings of QBXML to be passed in directly. 
     case
-    when request.is_a?(Hash)
+      when request.is_a?(Hash)
 
-      unless request.keys.include?(:qbxml_msgs_rq)
-        wrapped_request = { :qbxml_msgs_rq => {:xml_attributes => {"onError"=> QBWC::on_error } } } 
-        wrapped_request[:qbxml_msgs_rq] = wrapped_request[:qbxml_msgs_rq].merge(request)
-        request = wrapped_request
-      end
+        unless request.keys.include?(:qbxml_msgs_rq)
+          wrapped_request = { :qbxml_msgs_rq => {:xml_attributes => {"onError"=> QBWC::on_error } } }
+          wrapped_request[:qbxml_msgs_rq] = wrapped_request[:qbxml_msgs_rq].merge(request)
+          request = wrapped_request
+        end
 
-      @request = "<?xml version=\"1.0\"?>#{QBWC.parser.to_qbxml(request)}"
-    when request.is_a?(String)
-      @request = request
+        @request = <<-XML
+<?xml version="1.0" encoding="utf-8" ?>
+#{QBWC.parser.to_qbxml(request)}
+        XML
+
+      when request.is_a?(String)
+        @request = request
     end
+
+    if @request.present?
+      @request.gsub!(/#/,'Number ')
+      @request.gsub!(/&/,' and ')
+      @request.gsub!(/[^a-zA-Z0-9\s\.!\?\<\>\=\"\'\-\/]/,'')
+      @request.gsub!(/\n/,'')
+      @request.gsub!(/\r/,'')
+      @request.gsub!(/\>\s+\</,'><')
+      @request.gsub!(/version="\d+\.\d+"\?/,'version="13.0" ?')
+    end
+
   end
 
   def to_qbxml
-    QBWC.parser.to_qbxml(request)
+    QBWC.parser.to_qbxml(request, :validate => true)
   end
 
   def to_hash
