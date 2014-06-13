@@ -26,8 +26,7 @@ class QBWC::Request
 
     if @request.present?
       @request.gsub!(/#/,'Number ')
-      @request.gsub!(/&/,' and ')
-      @request.gsub!(/[^a-zA-Z0-9\s\.!\?\<\>\=\"\'\-\/]/,'')
+      @request.gsub!(/[^a-zA-Z0-9\s\.!\?\<\>\=\"\'\-\/&]/,'')
       @request.gsub!(/\n/,'')
       @request.gsub!(/\r/,'')
       @request.gsub!(/\>\s+\</,'><')
