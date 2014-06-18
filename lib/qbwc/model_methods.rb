@@ -9,7 +9,10 @@ module QBWC
     end
 
     def qb_queue
-      QBWC::QbwcJob.save(klass: self.class.to_s, klass_id: self.id)
+      job = QBWC::QbwcJob.new
+      job.klass = self.class.to_s
+      job.klass_id = self.id
+      job.save
     end
   end
 end
