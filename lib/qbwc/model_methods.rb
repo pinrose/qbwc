@@ -9,7 +9,7 @@ module QBWC
     end
 
     def qb_queue
-      QBWC::QbwcJob.create(klass: self.class.to_s, klass_id: self.id)
+      QBWC::QbwcJob.save(klass: self.class.to_s, klass_id: self.id)
     end
   end
 end
