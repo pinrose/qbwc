@@ -25,7 +25,7 @@ class QBWC::Request
     end
 
     if @request.present?
-      @request.gsub!(/version="\d+\.\d+"\?/,'version="13.0" ?')
+      @request.gsub!(/version="(\d+)\.(\d+)"\?/,'version="\1.\2" ?')
     end
 
   end
