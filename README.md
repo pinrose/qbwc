@@ -21,7 +21,7 @@ Run the generator:
 QBWC was designed to add quickbooks web connector integration to your Rails 3 application. 
 
 * Implementation of the Soap WDSL spec for Intuit Quickbooks and Point of Sale
-* Integration with the [qbxml](https://github.com/skryl/qbxml) gem providing qbxml processing
+* Integration with the [qbxml](https://github.com/pinrose/qbxml) gem providing qbxml processing
 
 ## Getting Started
 
@@ -47,8 +47,6 @@ A Job is just a named work queue. It consists of a name, a company (defaults to 
 *Note: All requests may be in ruby hash form, generated qbxml
 Raw requests are supported supported as of 0.0.3 (8/28/2012)*
 
-The code block is called every time a session must send a request. If block return nil, no request will be send and next pending job will be checked.
-
 Only enabled jobs with pending requests are added to a new session instance. Pending requests is checked calling code block, but an optional pending requests checking block can also be added to a job, so request creation can be avoided.
 
 An optional response processor block can also be added to a job. Responses to
@@ -65,127 +63,80 @@ Here is the rough order in which things happen:
   6. The response is processed
   7. If progress == 100 then the web connector closes the connection, otherwise goto 3
 
-### Adding Jobs
+### Get Your App Ready
 
-Create a new job
+Create a new class or use a rails model
 
-    QBWC.add_job('my job') do
-      # work to do
-    end
-
-Add a checking proc
-
-    QBWC.jobs['my job'].set_checking_proc do
-      # pending requests checking here
-    end
-
-Add a response proc
-
-    QBWC.jobs['my job'].set_response_proc do |r|
-      # response processing work here
-    end
-
-Caveats
-  * Jobs are enabled by default
-  * Using a non unique job name will overwrite the existing job
-
-###Sample Jobs
-
-Add a Customer (Wrapped)
-
-          {  :qbxml_msgs_rq => 
-            [
-              {
-                :xml_attributes =>  { "onError" => "stopOnError"}, 
-                :customer_add_rq => 
-                [
-                  {
-                    :xml_attributes => {"requestID" => "1"},  ##Optional
-                    :customer_add   => { :name => "GermanGR" }
-                  } 
-                ] 
-              }
-            ]
-          }
-          
-Add a Customer (Unwrapped)
-
-        {
-          :customer_add_rq    => 
-          [
-            {
-              :xml_attributes => {"requestID" => "1"},  ##Optional
-              :customer_add   => { :name => "GermanGR" }
-            } 
-          ] 
-        }
-
-Get All Vendors (In Chunks of 5)
-
-        QBWC.add_job(:import_vendors, nil
-          {
-            :vendor_query_rq  =>
-            {
-              :xml_attributes => { "requestID" =>"1", 'iterator'  => "Start" },
+    class Order < ActiveRecord::Base
+      include QBWC::ModelMethods
       
-              :max_returned => 5,
-              :owner_id => 0,
-              :from_modified_date=> "1984-01-29T22:03:19"
-
+      def qb_payload
+        # A receipt request hash payload
+        {
+          'sales_receipt_add_rq' => {
+            'xml_attributes' => {
+                'requestID' => self.number
+            },
+            'sales_receipt_add' => {
+                'customer_ref' => {
+                    'full_name' => 'Pinrose'
+                },
+                'class_ref' => {
+                    'full_name' => 'Online Sales'
+                },
+                'template_ref' => {
+                  'full_name' => 'Custom Sales Receipt'
+                },
+                'txn_date' => self.completed_at.strftime("%Y-%m-%d"),
+                'ref_number' => self.number,
+                'bill_address' => { #... },
+                'ship_address' => { #... },
+                'is_pending' => false,
+                'payment_method_ref' => { #... },
+                'memo' => 'This is a memo for the receipt',
+                'is_to_be_printed' => false,
+                'is_to_be_emailed' => false,
+                'sales_receipt_line_add' => [
+                  #...,
+                  #...,
+                  #...,
+                ]
             }
           }
-        )
-        
-Get All Vendors (Raw QBXML)
+        }
+      end
+      
+      def qb_response_handler(response)
+        # Do something with the response sent back to you
+      end
 
-        QBWC.add_job(:import_vendors, nil
-          '<?xml version="1.0"?>
-          <?qbxml version="7.0"?>
-          <QBXML>
-            <QBXMLMsgsRq onError="continueOnError">
-            <VendorQueryRq requestID="6" iterator="Start">
-            <MaxReturned>5</MaxReturned>
-            <FromModifiedDate>1984-01-29T22:03:19-05:00</FromModifiedDate>
-            <OwnerID>0</OwnerID>
-          </VendorQueryRq>
-          </QBXMLMsgsRq>
-          </QBXML>
-          '
-        )
+    end
 
-### Managing Jobs
+### Adding Jobs
 
-Jobs can be added, removed, enabled, and disabled. See the above section for
-details on adding new jobs. 
+Create a new job (Example above continued)
 
-Removing jobs is as easy as deleting them from the jobs hash.                   
+    order = Order.find(1)
+    order.qb_queue # returns false if it couldn't be saved or returns the job.
+    QBWC::QbwcJob.all
+    [#<QBWC::QbwcJob id: 1, klass: "Order", klass_id: 1, company: nil, processed: false, created_at: "2014-06-18 23:49:35", updated_at: "2014-16-18 23:49:35">]
+    # Next, run your Web Connector and it will pick it up.
+    
+### Set up your web connector
 
-    QBWC.jobs.delete('my job')
+You'll have a call to get your QWC file at:
 
-Disabling a job
+    https://www.yourdomain.com/qbwc/qwc
+    
+Enter that after you open Web Connector and click 'Add an Application'. Your ssl cert will need to be confirmed. Set your password, check the box to the left and click 'Update Selected'
 
-    QBWC.jobs['my job'].disable
+The Web Connector should pull in your job and run it.
 
-Enabling a job
-
-    QBWC.jobs['my job'].enable
-
+If you are working in development mode on a local machine, download, install and run ngrok - https://ngrok.com/
+    
 ### Supporting multiple users/companies
 
-Override get_user and current_company methods in the generated controller. authenticate_user must authenticate with username and password and return user if it's authenticated, nil in other case. current_company receives authenticated user and must return nil if there are no pending jobs or company where jobs will run. Currently this methods are like this:
-
-    protected
-    def authenticate_user(username, password)
-      username if username == QBWC.username && password == QBWC.password
-    end
-    def current_company(user)
-      QBWC.company_file_path if QBWC.pending_jobs(QBWC.company_file_path).present?
-    end
-
-
-### Check versions ###
-
-If you want to return server version or check client version you can override server_version_response or check_client_version methods in your controller. Check QB web connector guide for allowed responses.
+Coming soon.
 
 ## Contributing to qbwc
  
