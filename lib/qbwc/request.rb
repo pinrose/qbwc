@@ -25,11 +25,6 @@ class QBWC::Request
     end
 
     if @request.present?
-      @request.gsub!(/#/,'Number ')
-      @request.gsub!(/[^a-zA-Z0-9\s\.!\?\<\>\=\"\'\-\/&]/,'')
-      @request.gsub!(/\n/,'')
-      @request.gsub!(/\r/,'')
-      @request.gsub!(/\>\s+\</,'><')
       @request.gsub!(/version="\d+\.\d+"\?/,'version="13.0" ?')
     end
 
