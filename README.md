@@ -15,6 +15,8 @@ Add it to your Gemfile
 Run the generator:
 
   `rails generate qbwc:install`
+  
+  `rake db:migrate`
 
 ## Features
 
