@@ -31,7 +31,7 @@ class QBWC::Request
   end
 
   def to_qbxml
-    QBWC.parser.to_qbxml(request, :validate => true)
+    I18n.transliterate QBWC.parser.to_qbxml(request, :validate => true)
   end
 
   def to_hash
