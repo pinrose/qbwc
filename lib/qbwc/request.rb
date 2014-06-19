@@ -28,10 +28,11 @@ class QBWC::Request
       @request.gsub!(/version="(\d+)\.(\d+)"\?/,'version="\1.\2" ?')
     end
 
+    @request = I18n.transliterate @request
   end
 
   def to_qbxml
-    I18n.transliterate QBWC.parser.to_qbxml(request, :validate => true)
+    QBWC.parser.to_qbxml(request, :validate => true)
   end
 
   def to_hash
